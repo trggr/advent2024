@@ -54,11 +54,7 @@
          dir      :up
          ahead    (next-step guard dir)
          visited  (sorted-map)]
-    ; (println (keys visited))
-    (cond ; (> (count visited) 70)
-          ; :over20
-
-          (contains? visited [guard dir])
+    (cond (contains? visited [guard dir])
           :loop
 
           (not (contains? inp ahead))
@@ -77,17 +73,76 @@
 
 (def inp2 (assoc inp guard \.))
 
-;; test
+;; (def walked (walk inp2))
+
+;; (count walked)
+
+;; ;; test
 ;; (map #(loop? (assoc inp2 % \#)) [[6 3] [7 6] [7 7] [8 1] [8 3] [9 7]])
 
-(->> (for [x (range 130) y (range 130)] [x y])
-     (pmap (fn [obstacle] (loop? (assoc inp2 obstacle \#))))
-     (filter #(= % :loop))
-     count)
-
+;; (->> walked
+;;      (pmap (fn [obstacle] (loop? (assoc inp2 obstacle \#))))
+;;      (filter #(= % :loop))
+;;      count)
 
 (defn main
   []
-  (println (count (walk inp))))
+  (let [walked (walk inp)
+        p2 (->> walked
+                (pmap (fn [obstacle] (loop? (assoc inp obstacle \#))))
+                (filter #(= % :loop))
+                count)]
+    (println (count walked) p2)))
 
+;; Part 2 algorithm:
+;; This algorithm worked on the test data. But on the real one it gives:
+;; "too low" result. Some improvement can be to use it, subtract it from
+;; "visited" from part 1 and then use brute force on a difference.
+;;
+;; Part2 algorithm: if "ahead" was already visited
+;; going in a direction that is "right" to a current, then an obstacle
+;; can be placed directly beyond "ahead"
+;; -or-
+;; if at the "guard" point I turn right and, looking as far as I can,
+;; I see already visited point with "right"
+;; direction, then I can add an "ahead" point as an obstacle
 
+;; (defn see-visited?
+;;   [visited inp guard dir]
+;;   (reduce (fn [acc _p]
+;;             (let [p (mapv + acc (get dirs dir))]
+;;               (cond (not (contains? inp p))     (reduced nil)
+;;                     (= (get inp p) \#)          (reduced nil)
+;;                     (contains? visited [p dir]) (reduced p)
+;;                     :else p)))
+;;           guard
+;;           (range 130)))
+
+  ;; (defn walk2
+  ;;   [inp]
+  ;;   (loop [guard     guard
+  ;;          dir       :up
+  ;;          ahead     (next-step guard dir)
+  ;;          visited   (sorted-map)
+  ;;          obstacles  #{}]
+  ;;     (cond (not (contains? inp ahead))                   obstacles
+  ;;           (= (get inp ahead) \#)                        (recur guard
+  ;;                                                                (rotate dir)
+  ;;                                                                (next-step guard (rotate dir))
+  ;;                                                                visited
+  ;;                                                                obstacles)
+  ;;           (contains? visited [ahead (rotate dir)])      (recur ahead
+  ;;                                                                dir
+  ;;                                                                (next-step ahead dir)
+  ;;                                                                (assoc visited [guard dir] 1)
+  ;;                                                                (conj obstacles (next-step ahead dir)))
+  ;;           ;; (see-visited? visited inp guard (rotate dir)) (recur ahead
+  ;;           ;;                                                      dir
+  ;;           ;;                                                      (next-step ahead dir)
+  ;;           ;;                                                      (assoc visited [guard dir] 1)
+  ;;           ;;                                                      (conj obstacles ahead))
+  ;;           :else                                         (recur ahead
+  ;;                                                                dir
+  ;;                                                                (next-step ahead dir)
+  ;;                                                                (assoc visited [guard dir] 1)
+  ;;                                                                obstacles))))
