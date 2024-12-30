@@ -31,3 +31,25 @@
 
 (->> inp (map solvable?) (reduce +))
 
+(defn eval-expression2
+  [xs]
+  (reduce (fn [acc [op x]]
+            (if (= op \|)
+              (parse-long (str acc x))
+              (op acc x)))
+          (first xs)
+          (partition 2 (rest xs))))
+
+(defn solvable2?
+  [[goal & numbers]]
+  (let [expressions (reduce (fn [acc n]
+                              (mapcat (fn [xs] [(conj xs + n)
+                                                (conj xs * n)
+                                                (conj xs \| n)]) acc))
+                            [[(first numbers)]]
+                            (rest numbers))]
+    (if (some (fn [e] (= goal (eval-expression2 e))) expressions)
+      goal
+      0)))
+
+(->> inp (map solvable2?) (reduce +))
