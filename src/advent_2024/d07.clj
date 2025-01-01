@@ -22,13 +22,6 @@
     (when (some (fn [e] (= goal (eval2 e))) expressions)
       goal)))
 
-;; (defn solve
-;;   [inp ops]
-;;   (->> inp
-;;        (filter (partial solvable? ops))
-;;        (map first)
-;;        (reduce +)))
-
 (defn solve
   [inp ops]
   (let [xf (comp
@@ -47,13 +40,6 @@
     (println (solve inp [+ *])
              (solve inp [+ * \|]))))
 
-(time (main))
+; (time (main))
 ; 5837374519342 492383931650959
 ; "Elapsed time: 90056.529 msecs"
-
-(time (main))
-; via transdusers
-; 5837374519342 492383931650959
-; "Elapsed time: 90830.7351 msecs"
-
-
