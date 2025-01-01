@@ -3,53 +3,57 @@
             [clojure.string  :as str]
             [clojure.edn :as edn]))
 
-(def inp (as-> "d07" $
-           (lib/read-file $)
-           (str/replace $ #":" "")
-           (str/split $ #"\r\n")
-           (map (fn [s] (edn/read-string (str "[" s "]"))) $)))
-
-; inp
-; ([190 10 19] [3267 81 40 27] [83 17 5] [156 15 6] [7290 6 8 6 15] [161011 16 10 13] [192 17 8 14] [21037 9 7 18 13] [292 11 6 16 20])
-
-(defn eval-expression
+(defn eval2
   [xs]
   (reduce (fn [acc [op x]]
-            (op acc x))
+            (cond (= op \|) (parse-long (str acc x))
+                  (= op *)  (* acc x)
+                  (= op +)  (+ acc x)
+                  :else (throw (ArithmeticException. (str "Unknown operator: " op)))))
           (first xs)
           (partition 2 (rest xs))))
 
 (defn solvable?
-  [[goal & numbers]]
-  (let [expressions (reduce (fn [acc n]
-                              (mapcat (fn [xs] [(conj xs + n) (conj xs * n)]) acc))
+  [ops [goal & numbers]]
+  (let [expressions (reduce (fn [acc n] (concat (for [x acc, op ops]
+                                                  (conj x op n))))
                             [[(first numbers)]]
                             (rest numbers))]
-    (if (some (fn [e] (= goal (eval-expression e))) expressions)
-      goal
-      0)))
+    (when (some (fn [e] (= goal (eval2 e))) expressions)
+      goal)))
 
-(->> inp (map solvable?) (reduce +))
+;; (defn solve
+;;   [inp ops]
+;;   (->> inp
+;;        (filter (partial solvable? ops))
+;;        (map first)
+;;        (reduce +)))
 
-(defn eval-expression2
-  [xs]
-  (reduce (fn [acc [op x]]
-            (if (= op \|)
-              (parse-long (str acc x))
-              (op acc x)))
-          (first xs)
-          (partition 2 (rest xs))))
+(defn solve
+  [inp ops]
+  (let [xf (comp
+            (filter (partial solvable? ops))
+            (map first))]
+    (transduce xf + inp)))
 
-(defn solvable2?
-  [[goal & numbers]]
-  (let [expressions (reduce (fn [acc n]
-                              (mapcat (fn [xs] [(conj xs + n)
-                                                (conj xs * n)
-                                                (conj xs \| n)]) acc))
-                            [[(first numbers)]]
-                            (rest numbers))]
-    (if (some (fn [e] (= goal (eval-expression2 e))) expressions)
-      goal
-      0)))
 
-(->> inp (map solvable2?) (reduce +))
+(defn main
+  []
+  (let [inp (as-> "d07" $
+              (lib/read-file $)
+              (str/replace $ #":" "")
+              (str/split $ #"\r\n")
+              (map (fn [s] (edn/read-string (str "[" s "]"))) $))]
+    (println (solve inp [+ *])
+             (solve inp [+ * \|]))))
+
+(time (main))
+; 5837374519342 492383931650959
+; "Elapsed time: 90056.529 msecs"
+
+(time (main))
+; via transdusers
+; 5837374519342 492383931650959
+; "Elapsed time: 90830.7351 msecs"
+
+
