@@ -36,18 +36,7 @@ inp
 
 antennas
 
-(def A (get antennas \A))
-
-(defn line
-  "Line going through p1 and p2"
-  [p1 p2]
-  (let [[x1 y1] p1
-        [x2 y2] p2
-        a  (/ (- y2 y1) (- x2 x1))
-        b  (- y1 (* a x1))]
-    (fn [x]
-      (+ (* a x) b))))
-
+(def A (get antennas \T))
 
 (defn diff [p2 p1] (map - p2 p1))
 
@@ -57,19 +46,88 @@ antennas
     [(map + p2 delta)
      (map - p1 delta)]))
 
+
 (defn antinodes-of
   [antenna]
-  (let [A   (get antennas antenna)
-        tmp (for [p1 A, p2 A :when (not= p1 p2)]
-              [(antinodes p1 p2) p1 p2])]
-    (->> tmp
+  (let [A (get antennas antenna)]
+    (->> (for [p1 A,
+               p2 A
+               :when (not= p1 p2)]
+           [(antinodes p1 p2) p1 p2])
          (map first)
          (reduce (fn [acc [a1 a2]] (conj acc a1 a2)) [])
          distinct
          (filter (fn [[x y]] (and (<= 0 x (dec N))  (<= 0 y (dec N))))))))
 
+;; part 1
 (->> antennas
      keys
      (mapcat (fn [a] (antinodes-of a)))
+     distinct
+     count)
+
+
+(defn line-x->y
+  "Line going through p1 and p2, returns fn that takes x which gives y"
+  [p1 p2]
+  (let [[r1 c1] p1
+        [r2 c2] p2
+        k  (/ (- r2 r1) (- c2 c1))]
+    (fn [b]
+      (+ (* k (- b c1)) r1))))
+
+(defn line-y->x
+  "Line going through p1 and p2, returns fn that takes y which gives x"
+  [p1 p2]
+  (let [[r1 c1] p1
+        [r2 c2] p2
+        k  (/ (- c2 c1) (- r2 r1))]
+    (fn [b]
+      (+ (* k (- b r1)) c1))))
+
+(defn antinodes4-y-x
+  [p1 p2]
+  (let [x1   (first p1)
+        x2   (first p2)
+        dx   (abs (- x1 x2))
+        -dx  (* dx -1)
+        f    (line-y->x p1 p2)]
+    (->> (for [x (range x1 N dx)] x)
+         (concat (for [x (range x1 -1 -dx)] x))
+         (map (fn [x] [(f x) x]))
+        ;;  (remove (fn [p] (or (= p p1)
+        ;;                      (= p p2))))
+         (filter (fn [[row col]] (and (<= 0 row (dec N))
+                                      (<= 0 col (dec N))))))))
+
+(defn antinodes4
+  [p1 p2]
+  (let [x1   (second p1)
+        x2   (second p2)
+        dx   (abs (- x1 x2))
+        -dx  (* dx -1)
+        f    (line-x->y p1 p2)]
+    (if (zero? dx)
+      (antinodes4-y-x p1 p2)
+      (->> (for [x (range x1 N dx)] x)
+           (concat (for [x (range x1 -1 -dx)] x))
+           (map (fn [x] [(f x) x]))
+           (filter (fn [[row col]] (and (<= 0 row (dec N))
+                                        (<= 0 col (dec N)))))))))
+
+
+(defn antinodes4-of
+  [antenna]
+  (let [A (get antennas antenna)]
+    (->> (for [p1 A,
+               p2 A
+               :when (not= p1 p2)]
+           (antinodes4 p1 p2))
+         (apply concat)
+         distinct)))
+
+(->> antennas
+     keys
+     (mapcat (fn [a] (antinodes4-of a)))
      distinct
      count)
