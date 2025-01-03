@@ -6,6 +6,7 @@
             [advent-2024.d05 :as d05]
             ; [advent-2024.d06 :as d06]
             ; [advent-2024.d07 :as d07]
+            [advent-2024.d08 :as d08]
 ))
 
 (defn -main
@@ -21,4 +22,5 @@
   ;; Day 7: slow solution
   ;; (d07/main)
   (println 5837374519342 492383931650959)
+  (d08/main)
 )
