@@ -7,7 +7,7 @@
             ; [advent-2024.d06 :as d06]
             ; [advent-2024.d07 :as d07]
             [advent-2024.d08 :as d08]
-))
+            [advent-2024.d09 :as d09]))
 
 (defn -main
   []
@@ -17,10 +17,9 @@
   (d04/main)
   (d05/main)
   ;; Day 6: using brute force, it works but slow
-  ;; (d06/main)
   (println 5312 1748)
   ;; Day 7: slow solution
-  ;; (d07/main)
   (println 5837374519342 492383931650959)
   (d08/main)
+  (d09/main)
 )
