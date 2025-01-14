@@ -35,19 +35,18 @@
     (when (and (int? n) (int? m))
       [n m])))
 
-;; part1
-(->> inp
-     (map (fn [[a b p]] (solve-cramer a b p)))
-     (remove nil?)
-     (map (fn [[a b]] (+ (* 3 a) (* 1 b))))
-     (reduce +))
-
 (defn add_1E13 [[x y]]
   [(+ 10000000000000 x) (+ 10000000000000 y)])
 
-;; part2
-(->> inp
-     (map (fn [[a b p]] (solve-cramer a b (add_1E13 p))))
-     (remove nil?)
-     (map (fn [[a b]] (+ (* 3 a) (* 1 b))))
-     (reduce +))
+(defn solve
+  [f]
+  (->> inp
+       (map (fn [[a b p]] (solve-cramer a b (f p))))
+       (remove nil?)
+       (map (fn [[a b]] (+ (* 3 a) (* 1 b))))
+       (reduce +)))
+
+(defn main
+  []
+  (println (solve identity)
+           (solve add_1E13)))

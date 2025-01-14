@@ -50,5 +50,3 @@
            (->> inp (map (partial blink-count 75)) (reduce +))))
 
 
-
-

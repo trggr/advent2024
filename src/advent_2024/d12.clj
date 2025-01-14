@@ -85,4 +85,4 @@
   (let [plots (find-plots inp)]
     (println (->> plots (map price) (reduce +)))))
 
-(main)
+;; (main)

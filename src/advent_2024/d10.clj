@@ -46,8 +46,7 @@
           (map vector trailheads)
           (range 1 10)))
 
-;; part 1
-(->> rc (map (juxt first last)) distinct count)
-
-;; part 2
-(->> rc (map ffirst) count)
+(defn main
+  []
+  (println (->> rc (map (juxt first last)) distinct count)
+           (->> rc (map ffirst) count)))
