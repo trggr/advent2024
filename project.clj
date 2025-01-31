@@ -2,7 +2,8 @@
   :description "Advent of Code 2024"
   :dependencies [[org.clojure/clojure            "1.12.0"]
                  [org.clojure/math.combinatorics "0.1.6"]
-                 [nrepl                          "1.1.1"]]
+                 [nrepl                          "1.1.1"]
+                 [zprint                         "1.2.9"]]
   :plugins       [[cider/cider-nrepl             "0.47.1"]]
   :main          advent-2024.core
   :target-path   "target/%s"

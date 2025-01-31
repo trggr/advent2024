@@ -1,16 +1,16 @@
-;; Solved the first part qucickly.
+;; Solved the first part quickly.
 ;;
-;; Got stuck really bad on a second one.
-
-;; I was able to handle the first several cases, but was stuck on a test
-;; case with Es and Xs
+;; Got stuck on a second one.
+;;
+;; I was able to handle the few first test cases, until the case with Es and Xs.
+;;
 ;; After 267 attempts to use all kinds of tricks to connect blocks, walk along them,
 ;; connect their sides, define compatible sides, connecting compatible sides,
 ;; definining one-fers, two-fers and three-fers, defining island plots,
 ;; subtracting their perimeter from the host, calculating the external
 ;; perimeters of each plot and on and on.
 ;;
-;; After two weeks, I finally gave up and found a solution by tschady:
+;; After two weeks, I finally gave up and found a solution by tschady (thanks!):
 ;; https://github.com/tschady/advent-of-code/blob/main/src/aoc/2024/d12.clj
 ;;
 ;; which uses the idea that the perimeter of a polygon is equal to the
@@ -19,14 +19,18 @@
 ;; - count-angles
 ;;
 
-
 (ns advent-2024.d12
   (:require [advent-2024.lib :as lib]
             [clojure.string  :as str]
             [clojure.set     :as set]
-            [clojure.math.combinatorics :as combo]))
+            [clojure.math.combinatorics :as combo]
+            [zprint.core :as zp]))
 
-(def inp (->> "d12"
+;; (zp/set-options! {:map {:key-order [:type]} :style :justified})
+;; (zp/set-options! {:map {:key-order [:type]}, :max-length [20 3 1 0]})
+;; (zp/czprint inp)
+
+(def inp (->> "d12-test"
               lib/read-file
               str/split-lines
               (map-indexed (fn [i s] [i (zipmap (range) (seq s))]))
@@ -209,3 +213,4 @@
 (defn main []
   (println (part1 inp) (part2 inp)))
 
+(zp/czprint inp)
