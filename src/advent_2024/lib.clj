@@ -7,6 +7,53 @@
   [x y]
   (str/split y x))
 
+(defn string->matrix
+  "Parses a string into a matrix, represented as a map with a key [i j]"
+  [s]
+  (->> s
+       (str-split #"\r\n")
+       (map-indexed (fn [i s] [i (zipmap (range) (seq s))]))
+       (reduce (fn [acc [i mp]]
+                 (reduce (fn [a [j v]]
+                           (assoc a [i j] v))
+                         acc
+                         mp))
+               (sorted-map))))
+
+(defn print-matrix
+  [matrix]
+  (let [nlines (->> matrix keys (map first) (reduce max) inc)
+        ncols  (->> matrix keys (map second) (reduce max) inc)
+        tmp    (for [i (range nlines)]
+                 (apply str
+                        (for [j (range ncols)]
+                          (get matrix [i j]))))]
+    (doseq [line (map str tmp)]
+      (println line))))
+
+(defn matrix->plane
+  [matrix]
+  (let [N (->> matrix keys (map first) (reduce max))]
+    (reduce-kv (fn [acc [i j] v]
+                 (assoc acc [j (- N i)] v))
+               (sorted-map)
+               matrix)))
+
+(defn print-plane
+  [plane]
+  (let [width  (->> plane keys (map first) (reduce max) inc)
+        height (->> plane keys (map second) (reduce max))
+        tmp    (for [y (range height -1 -1)]
+                 (apply str
+                        (for [x (range width)]
+                          (get plane [x y]))))]
+    (doseq [line (map str tmp)]
+      (println line))))
+
+(defn add-vector
+  [[x1 y1] [x2 y2]]
+  [(+ x1 x2) (+ y1 y2)])
+
 (defn read-file [name]
   (-> (str name ".txt")
       io/resource
