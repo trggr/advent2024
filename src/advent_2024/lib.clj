@@ -142,3 +142,44 @@
                  (str/join "  " (map pad maxlens row))))))
 
 (defn in? [xs x]      (contains? (set xs) x))
+
+
+;;;------------------ GRAPHS ---------------
+
+(defn dfs-find-parents
+  "Takes graph, root node, fn get-neighbors (of two arguments: graph and node);
+   walks every reachable node from root, and returns parent nodes for each visited node.
+   Sample usage to return a reverse path from start to finish:
+       (def parent-nodes (dfs-find-parents graph get-children-fn start))
+       (take-while (fn [goal] (not= goal start))
+                   (iterate parent-nodes finish))"
+  [graph get-neighbors root]
+  (loop [parents {root :none}
+         stack   [root]
+         visited #{}]
+    (if-not (seq stack)
+      parents
+      (let [u         (peek stack)
+            unvisited (->> u (get-neighbors graph) (remove visited))]
+        (recur (reduce (fn [acc k] (if (contains? acc k) acc (assoc acc k u))) parents unvisited)
+               (into (pop stack) unvisited)
+               (if (contains? visited u) visited (conj visited u)))))))
+
+
+
+(defn dfs-find-paths
+  "Takes fn goal?, fn branch?, fn children, and a root node.
+   Returns all paths from root to the goal"
+  [goal? branch? children root]
+  (let [walk (fn walk [visited node]
+               (let [visited (conj visited node)]
+                 (lazy-seq (cons visited
+                                 (cond (goal? node) nil
+                                       (not (branch? node visited)) nil
+                                       :else (mapcat (fn [n] (walk visited n))
+                                                     (children node visited)))))))]
+    (->> root
+         (walk '())
+         (filter (fn [coll] (goal? (first coll))))
+         (map reverse))))
+
